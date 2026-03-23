@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electronics Inventory Manager</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
+        header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+        header h1 { font-size: 1.5rem; font-weight: 600; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: .9rem; font-weight: 500; transition: background .2s; }
+        .btn-primary { background: #1a73e8; color: #fff; }
+        .btn-primary:hover { background: #1558b0; }
+        .btn-danger { background: #d93025; color: #fff; }
+        .btn-danger:hover { background: #b3261e; }
+        .btn-secondary { background: #5f6368; color: #fff; }
+        .btn-secondary:hover { background: #44474a; }
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+        thead { background: #e8eaed; }
+        th, td { padding: 14px 16px; text-align: left; font-size: .9rem; }
+        th { font-weight: 600; color: #555; }
+        tbody tr { border-top: 1px solid #e8eaed; }
+        tbody tr:hover { background: #f8f9fa; }
+        .actions { display: flex; gap: 8px; }
+
+        /* Modal */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-backdrop.active { display: flex; }
+        .modal { background: #fff; border-radius: 12px; width: 500px; max-width: 95vw; padding: 28px 32px; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+        .modal h2 { margin-bottom: 20px; font-size: 1.2rem; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 4px; font-size: .85rem; color: #555; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 6px; font-size: .9rem; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 70px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,.2); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .empty-state { text-align: center; padding: 48px; color: #888; font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Electronics Product Inventory</h1>
+        <button class="btn btn-primary" onclick="openAddModal()">+ Add Product</button>
+    </header>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Manufacturer</th>
+                    <th>Warranty</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="product-table-body">
+                <tr><td colspan="6" class="empty-state">Loading products&hellip;</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal">
+            <h2 id="modal-title">Add Product</h2>
+            <form id="product-form" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="product-id" />
+                <div class="form-group">
+                    <label for="name">Product Name</label>
+                    <input type="text" id="name" required maxlength="200" />
+                </div>
+                <div class="form-group">
+                    <label for="manufacturer">Manufacturer Name</label>
+                    <input type="text" id="manufacturer" required maxlength="200" />
+                </div>
+                <div class="form-group">
+                    <label for="warranty">Warranty Information</label>
+                    <input type="text" id="warranty" required maxlength="300" />
+                </div>
+                <div class="form-group">
+                    <label for="description">Product Description</label>
+                    <textarea id="description" required maxlength="1000"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity at Hand</label>
+                    <input type="number" id="quantity" min="0" required />
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/products';
+
+        async function loadProducts() {
+            const res = await fetch(API);
+            const products = await res.json();
+            const tbody = document.getElementById('product-table-body');
+
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No products found. Click <b>+ Add Product</b> to get started.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${escapeHtml(p.manufacturerName)}</td>
+                    <td>${escapeHtml(p.warrantyInformation)}</td>
+                    <td>${escapeHtml(p.productDescription)}</td>
+                    <td>${p.quantityAtHand}</td>
+                    <td class="actions">
+                        <button class="btn btn-primary" onclick="openEditModal(${p.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = 'Add Product';
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('submit-btn').textContent = 'Add Product';
+            document.getElementById('modal-backdrop').classList.add('active');
+        }
+
+        async function openEditModal(id) {
+            const res = await fetch(`${API}/${id}`);
+            if (!res.ok) return;
+            const p = await res.json();
+
+            document.getElementById('modal-title').textContent = 'Edit Product';
+            document.getElementById('product-id').value = p.id;
+            document.getElementById('name').value = p.name;
+            document.getElementById('manufacturer').value = p.manufacturerName;
+            document.getElementById('warranty').value = p.warrantyInformation;
+            document.getElementById('description').value = p.productDescription;
+            document.getElementById('quantity').value = p.quantityAtHand;
+            document.getElementById('submit-btn').textContent = 'Save Changes';
+            document.getElementById('modal-backdrop').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.remove('active');
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('product-id').value;
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                manufacturerName: document.getElementById('manufacturer').value.trim(),
+                warrantyInformation: document.getElementById('warranty').value.trim(),
+                productDescription: document.getElementById('description').value.trim(),
+                quantityAtHand: parseInt(document.getElementById('quantity').value, 10)
+            };
+
+            const isEdit = id !== '';
+            const url = isEdit ? `${API}/${id}` : API;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                closeModal();
+                loadProducts();
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+            if (res.ok) loadProducts();
+        }
+
+        // Initial load
+        loadProducts();
+    </script>
+</body>
+</html>
