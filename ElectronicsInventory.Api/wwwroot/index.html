@@ -4,138 +4,648 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Electronics Inventory Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
-        header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: #fff; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-        header h1 { font-size: 1.5rem; font-weight: 600; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: .9rem; font-weight: 500; transition: background .2s; }
-        .btn-primary { background: #1a73e8; color: #fff; }
-        .btn-primary:hover { background: #1558b0; }
-        .btn-danger { background: #d93025; color: #fff; }
-        .btn-danger:hover { background: #b3261e; }
-        .btn-secondary { background: #5f6368; color: #fff; }
-        .btn-secondary:hover { background: #44474a; }
-        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
-        thead { background: #28a745; }
-        th, td { padding: 14px 16px; text-align: left; font-size: .9rem; }
-        th { font-weight: 600; color: #fff; }
-        tbody tr { border-top: 1px solid #e8eaed; }
-        tbody tr:hover { background: #f8f9fa; }
-        .actions { display: flex; gap: 8px; }
+        /* ── Reset & Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary:   #4f46e5;
+            --primary-h: #4338ca;
+            --accent:    #06b6d4;
+            --success:   #10b981;
+            --danger:    #ef4444;
+            --danger-h:  #dc2626;
+            --neutral:   #64748b;
+            --neutral-h: #475569;
+            --bg:        #f1f5f9;
+            --card:      #ffffff;
+            --text:      #0f172a;
+            --muted:     #64748b;
+            --border:    #e2e8f0;
+            --radius:    12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06);
+            --shadow-lg: 0 20px 40px rgba(0,0,0,.15);
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* Modal */
-        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; }
+        /* ── Header ───────────────────────────────────────────────── */
+        header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
+            color: #fff;
+            padding: 0 32px;
+            box-shadow: 0 2px 12px rgba(79,70,229,.35);
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,.08) 1px, transparent 1px),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,.06) 1px, transparent 1px),
+                radial-gradient(circle at 60% 80%, rgba(255,255,255,.05) 1px, transparent 1px);
+            background-size: 40px 40px, 60px 60px, 80px 80px;
+        }
+        .header-inner {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,.18);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            flex-shrink: 0;
+        }
+        .header-logo svg { width: 26px; height: 26px; }
+        .header-brand h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.3px; }
+        .header-brand p { font-size: .8rem; opacity: .8; margin-top: 1px; }
+
+        /* ── Hero Banner ──────────────────────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
+            color: #fff;
+            padding: 32px 32px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--bg);
+            clip-path: ellipse(55% 100% at 50% 100%);
+        }
+        .hero-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .hero-text { flex: 1; }
+        .hero-text h2 { font-size: 1.9rem; font-weight: 700; line-height: 1.25; margin-bottom: 10px; }
+        .hero-text p { font-size: 1rem; opacity: .85; line-height: 1.6; max-width: 480px; }
+        .hero-illustration {
+            flex-shrink: 0;
+            width: 180px;
+            opacity: .92;
+        }
+        .hero-illustration svg { width: 100%; height: auto; }
+
+        /* ── Stats Cards ──────────────────────────────────────────── */
+        .stats-row {
+            max-width: 1100px;
+            margin: -28px auto 0;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            position: relative;
+            z-index: 10;
+        }
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .stat-icon svg { width: 24px; height: 24px; }
+        .stat-icon.indigo { background: #eef2ff; color: var(--primary); }
+        .stat-icon.cyan   { background: #ecfeff; color: var(--accent); }
+        .stat-icon.green  { background: #ecfdf5; color: var(--success); }
+        .stat-info .value { font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--text); }
+        .stat-info .label { font-size: .8rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+        /* ── Toolbar ──────────────────────────────────────────────── */
+        .toolbar {
+            max-width: 1100px;
+            margin: 28px auto 16px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .toolbar-left h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); }
+        .toolbar-left p  { font-size: .82rem; color: var(--muted); margin-top: 2px; }
+
+        /* ── Buttons ──────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .875rem;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background .15s, transform .1s, box-shadow .15s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(.97); }
+        .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(79,70,229,.35); }
+        .btn-primary:hover { background: var(--primary-h); box-shadow: 0 4px 14px rgba(79,70,229,.45); }
+        .btn-danger   { background: var(--danger); color: #fff; }
+        .btn-danger:hover  { background: var(--danger-h); }
+        .btn-secondary { background: #f1f5f9; color: var(--neutral); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-sm { padding: 6px 12px; font-size: .8rem; }
+        .btn svg { width: 15px; height: 15px; }
+
+        /* ── Table Card ───────────────────────────────────────────── */
+        .container { max-width: 1100px; margin: 0 auto 40px; padding: 0 16px; }
+        .table-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: linear-gradient(90deg, var(--primary), #7c3aed); }
+        th {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: .8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,.9);
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        td { padding: 14px 18px; font-size: .9rem; vertical-align: middle; }
+        tbody tr { border-top: 1px solid var(--border); transition: background .15s; }
+        tbody tr:hover { background: #f8fafc; }
+        .td-name { font-weight: 600; color: var(--text); }
+        .td-desc { color: var(--muted); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .qty-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+        .qty-badge.low    { background: #fef2f2; color: #b91c1c; }
+        .qty-badge.medium { background: #fffbeb; color: #92400e; }
+        .qty-badge.high   { background: #ecfdf5; color: #065f46; }
+        .warranty-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .actions { display: flex; gap: 8px; flex-wrap: nowrap; }
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            color: var(--muted);
+        }
+        .empty-state svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: .35; }
+        .empty-state p { font-size: 1rem; margin-bottom: 6px; font-weight: 500; }
+        .empty-state span { font-size: .875rem; }
+
+        /* ── Modal ────────────────────────────────────────────────── */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 16px;
+        }
         .modal-backdrop.active { display: flex; }
-        .modal { background: #fff; border-radius: 12px; width: 500px; max-width: 95vw; padding: 28px 32px; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
-        .modal h2 { margin-bottom: 20px; font-size: 1.2rem; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-weight: 500; margin-bottom: 4px; font-size: .85rem; color: #555; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #dadce0; border-radius: 6px; font-size: .9rem; font-family: inherit; }
-        .form-group textarea { resize: vertical; min-height: 70px; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,.2); }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .empty-state { text-align: center; padding: 48px; color: #888; font-size: 1rem; }
+        .modal {
+            background: var(--card);
+            border-radius: 16px;
+            width: 520px;
+            max-width: 100%;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp .2s ease;
+            overflow: hidden;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-header {
+            padding: 24px 28px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .modal-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .modal-icon svg { width: 20px; height: 20px; }
+        .modal h2 { font-size: 1.15rem; font-weight: 700; }
+        .modal-body { padding: 20px 28px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: .8rem;
+            color: var(--neutral);
+            letter-spacing: .02em;
+            text-transform: uppercase;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: .9rem;
+            font-family: inherit;
+            color: var(--text);
+            transition: border-color .15s, box-shadow .15s;
+            background: #fafbfc;
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+            background: #fff;
+        }
+        .modal-footer {
+            padding: 16px 28px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Footer ───────────────────────────────────────────────── */
+        footer {
+            margin-top: auto;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 20px 32px;
+            text-align: center;
+            font-size: .8rem;
+            color: var(--muted);
+        }
+        footer strong { color: var(--primary); }
+
+        /* ── Responsive ───────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            header { padding: 0 16px; }
+            .hero { padding: 24px 16px 44px; }
+            .hero-illustration { display: none; }
+            .hero-text h2 { font-size: 1.4rem; }
+            .stats-row { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            th:nth-child(3), td:nth-child(3),
+            th:nth-child(4), td:nth-child(4) { display: none; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ── Header ────────────────────────────────────────────────── -->
     <header>
-        <h1>Electronics Product Inventory</h1>
-        <button class="btn btn-primary" onclick="openAddModal()">+ Add Product</button>
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="header-logo">
+                    <!-- Circuit chip icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="7" y="7" width="10" height="10" rx="1"/>
+                        <path d="M9 7V4M12 7V4M15 7V4M9 17v3M12 17v3M15 17v3M17 9h3M17 12h3M17 15h3M7 9H4M7 12H4M7 15H4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>Electronics Inventory</h1>
+                    <p>Product management dashboard</p>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Add Product
+            </button>
+        </div>
     </header>
 
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Manufacturer</th>
-                    <th>Warranty</th>
-                    <th>Description</th>
-                    <th>Qty</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="product-table-body">
-                <tr><td colspan="6" class="empty-state">Loading products&hellip;</td></tr>
-            </tbody>
-        </table>
-    </div>
+    <!-- ── Hero Banner ───────────────────────────────────────────── -->
+    <section class="hero" aria-hidden="true">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <h2>Manage Your Electronics Catalog</h2>
+                <p>Track products, manufacturers, warranty details, and stock levels — all in one modern, streamlined dashboard.</p>
+            </div>
+            <div class="hero-illustration">
+                <!-- Electronics / Chip SVG illustration -->
+                <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- PCB board -->
+                    <rect x="30" y="30" width="140" height="100" rx="8" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>
+                    <!-- Chip center -->
+                    <rect x="72" y="52" width="56" height="56" rx="4" fill="rgba(255,255,255,.22)" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+                    <!-- Chip inner grid -->
+                    <line x1="88" y1="52" x2="88" y2="108" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                    <line x1="104" y1="52" x2="104" y2="108" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                    <line x1="72" y1="68" x2="128" y2="68" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                    <line x1="72" y1="84" x2="128" y2="84" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                    <line x1="72" y1="100" x2="128" y2="100" stroke="rgba(255,255,255,.25)" stroke-width="1"/>
+                    <!-- Chip pins top -->
+                    <line x1="80" y1="52" x2="80" y2="40" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="96" y1="52" x2="96" y2="40" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="112" y1="52" x2="112" y2="40" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Chip pins bottom -->
+                    <line x1="80" y1="108" x2="80" y2="120" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="96" y1="108" x2="96" y2="120" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="112" y1="108" x2="112" y2="120" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Chip pins left -->
+                    <line x1="72" y1="62" x2="50" y2="62" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="72" y1="80" x2="50" y2="80" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="72" y1="98" x2="50" y2="98" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Chip pins right -->
+                    <line x1="128" y1="62" x2="150" y2="62" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="128" y1="80" x2="150" y2="80" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="128" y1="98" x2="150" y2="98" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Decorative dots -->
+                    <circle cx="42" cy="42" r="4" fill="rgba(255,255,255,.5)"/>
+                    <circle cx="158" cy="42" r="4" fill="rgba(255,255,255,.5)"/>
+                    <circle cx="42" cy="118" r="4" fill="rgba(255,255,255,.5)"/>
+                    <circle cx="158" cy="118" r="4" fill="rgba(255,255,255,.5)"/>
+                    <!-- Highlight dot in chip -->
+                    <circle cx="100" cy="80" r="8" fill="rgba(255,255,255,.3)" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+                </svg>
+            </div>
+        </div>
+    </section>
 
-    <!-- Add / Edit Modal -->
-    <div class="modal-backdrop" id="modal-backdrop">
-        <div class="modal">
-            <h2 id="modal-title">Add Product</h2>
-            <form id="product-form" onsubmit="handleSubmit(event)">
-                <input type="hidden" id="product-id" />
-                <div class="form-group">
-                    <label for="name">Product Name</label>
-                    <input type="text" id="name" required maxlength="200" />
-                </div>
-                <div class="form-group">
-                    <label for="manufacturer">Manufacturer Name</label>
-                    <input type="text" id="manufacturer" required maxlength="200" />
-                </div>
-                <div class="form-group">
-                    <label for="warranty">Warranty Information</label>
-                    <input type="text" id="warranty" required maxlength="300" />
-                </div>
-                <div class="form-group">
-                    <label for="description">Product Description</label>
-                    <textarea id="description" required maxlength="1000"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="quantity">Quantity at Hand</label>
-                    <input type="number" id="quantity" min="0" required />
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submit-btn">Save</button>
-                </div>
-            </form>
+    <!-- ── Stats Cards ────────────────────────────────────────────── -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon indigo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <div class="value" id="stat-total">—</div>
+                <div class="label">Total Products</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <div class="value" id="stat-qty">—</div>
+                <div class="label">Units in Stock</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+            </div>
+            <div class="stat-info">
+                <div class="value" id="stat-manufacturers">—</div>
+                <div class="label">Manufacturers</div>
+            </div>
         </div>
     </div>
+
+    <!-- ── Toolbar ────────────────────────────────────────────────── -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <h3>Product Catalog</h3>
+            <p>Browse and manage all electronics products</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add Product
+        </button>
+    </div>
+
+    <!-- ── Product Table ──────────────────────────────────────────── -->
+    <div class="container">
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Manufacturer</th>
+                        <th>Warranty</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="product-table-body">
+                    <tr><td colspan="6">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                            <p>Loading products&hellip;</p>
+                        </div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── Add / Edit Modal ───────────────────────────────────────── -->
+    <div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="7" y="7" width="10" height="10" rx="1"/><path d="M9 7V4M12 7V4M15 7V4M9 17v3M12 17v3M15 17v3M17 9h3M17 12h3M17 15h3M7 9H4M7 12H4M7 15H4"/>
+                    </svg>
+                </div>
+                <h2 id="modal-title">Add Product</h2>
+            </div>
+            <div class="modal-body">
+                <form id="product-form" onsubmit="handleSubmit(event)">
+                    <input type="hidden" id="product-id" />
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Product Name</label>
+                            <input type="text" id="name" placeholder="e.g. Wireless Earbuds" required maxlength="200" />
+                        </div>
+                        <div class="form-group">
+                            <label for="manufacturer">Manufacturer</label>
+                            <input type="text" id="manufacturer" placeholder="e.g. Sony" required maxlength="200" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="warranty">Warranty</label>
+                            <input type="text" id="warranty" placeholder="e.g. 2 Years" required maxlength="300" />
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" placeholder="0" min="0" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Product Description</label>
+                        <textarea id="description" placeholder="Enter a brief product description…" required maxlength="1000"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn" form="product-form">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    Save Product
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Footer ────────────────────────────────────────────────── -->
+    <footer>
+        <strong>Electronics Inventory Manager</strong> &nbsp;·&nbsp; Built with ASP.NET Core &nbsp;·&nbsp; &copy; <span id="year"></span>
+    </footer>
 
     <script>
         const API = '/api/products';
 
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        /* ── Stats helpers ──────────────────────────────────────── */
+        function updateStats(products) {
+            document.getElementById('stat-total').textContent = products.length;
+            const totalQty = products.reduce((sum, p) => sum + p.quantityAtHand, 0);
+            document.getElementById('stat-qty').textContent = totalQty.toLocaleString();
+            const uniqueMfrs = new Set(products.map(p => p.manufacturerName.trim().toLowerCase())).size;
+            document.getElementById('stat-manufacturers').textContent = uniqueMfrs;
+        }
+
+        function qtyBadgeClass(qty) {
+            if (qty <= 5)  return 'low';
+            if (qty <= 20) return 'medium';
+            return 'high';
+        }
+
+        /* ── Load products ──────────────────────────────────────── */
         async function loadProducts() {
-            const res = await fetch(API);
-            const products = await res.json();
-            const tbody = document.getElementById('product-table-body');
+            try {
+                const res = await fetch(API);
+                const products = await res.json();
+                const tbody = document.getElementById('product-table-body');
 
-            if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No products found. Click <b>+ Add Product</b> to get started.</td></tr>';
-                return;
+                updateStats(products);
+
+                if (products.length === 0) {
+                    tbody.innerHTML = `
+                        <tr><td colspan="6">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                                </svg>
+                                <p>No products found</p>
+                                <span>Click <b>Add Product</b> to get started.</span>
+                            </div>
+                        </td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = products.map(p => `
+                    <tr>
+                        <td class="td-name">${escapeHtml(p.name)}</td>
+                        <td>${escapeHtml(p.manufacturerName)}</td>
+                        <td><span class="warranty-tag">${escapeHtml(p.warrantyInformation)}</span></td>
+                        <td class="td-desc" title="${escapeHtml(p.productDescription)}">${escapeHtml(p.productDescription)}</td>
+                        <td><span class="qty-badge ${qtyBadgeClass(p.quantityAtHand)}">${p.quantityAtHand}</span></td>
+                        <td class="actions">
+                            <button class="btn btn-primary btn-sm" onclick="openEditModal(${p.id})">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch {
+                document.getElementById('product-table-body').innerHTML =
+                    '<tr><td colspan="6"><div class="empty-state"><p>Failed to load products.</p><span>Please check your connection and try again.</span></div></td></tr>';
             }
-
-            tbody.innerHTML = products.map(p => `
-                <tr>
-                    <td>${escapeHtml(p.name)}</td>
-                    <td>${escapeHtml(p.manufacturerName)}</td>
-                    <td>${escapeHtml(p.warrantyInformation)}</td>
-                    <td>${escapeHtml(p.productDescription)}</td>
-                    <td>${p.quantityAtHand}</td>
-                    <td class="actions">
-                        <button class="btn btn-primary" onclick="openEditModal(${p.id})">Edit</button>
-                        <button class="btn btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
         }
 
         function escapeHtml(text) {
             const div = document.createElement('div');
-            div.textContent = text;
+            div.textContent = text ?? '';
             return div.innerHTML;
         }
 
+        /* ── Modal ──────────────────────────────────────────────── */
         function openAddModal() {
             document.getElementById('modal-title').textContent = 'Add Product';
             document.getElementById('product-form').reset();
             document.getElementById('product-id').value = '';
-            document.getElementById('submit-btn').textContent = 'Add Product';
+            document.getElementById('submit-btn').innerHTML =
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Add Product`;
             document.getElementById('modal-backdrop').classList.add('active');
         }
 
@@ -151,7 +661,8 @@
             document.getElementById('warranty').value = p.warrantyInformation;
             document.getElementById('description').value = p.productDescription;
             document.getElementById('quantity').value = p.quantityAtHand;
-            document.getElementById('submit-btn').textContent = 'Save Changes';
+            document.getElementById('submit-btn').innerHTML =
+                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> Save Changes`;
             document.getElementById('modal-backdrop').classList.add('active');
         }
 
@@ -159,6 +670,11 @@
             document.getElementById('modal-backdrop').classList.remove('active');
         }
 
+        function handleBackdropClick(e) {
+            if (e.target === document.getElementById('modal-backdrop')) closeModal();
+        }
+
+        /* ── Form submit ────────────────────────────────────────── */
         async function handleSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('product-id').value;
@@ -186,6 +702,7 @@
             }
         }
 
+        /* ── Delete ─────────────────────────────────────────────── */
         async function deleteProduct(id) {
             if (!confirm('Are you sure you want to delete this product?')) return;
             const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
